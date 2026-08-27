@@ -1,0 +1,782 @@
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   BODY
+========================================= */
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    min-height: 100vh;
+
+    overflow-x: hidden;
+
+    background: #06152e;
+}
+
+
+/* =========================================
+   MAIN PAGE
+========================================= */
+
+.page {
+    min-height: 100vh;
+
+    width: 100%;
+
+    display: flex;
+
+    position: relative;
+}
+
+
+/* =========================================
+   LEFT SECTION
+========================================= */
+
+.left-section {
+    width: 68%;
+    min-height: 100vh;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    background-image: url("fintech-bg.png");
+    background-size: cover;
+    background-position: left center;
+    background-repeat: no-repeat;
+}
+
+
+
+/* =========================================
+   DARK OVERLAY ON LEFT
+========================================= */
+
+/*
+   This makes the text easier to read
+   if the image is bright.
+*/
+
+.left-section::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(3, 19, 41, 0.20),
+            rgba(3, 19, 41, 0.05)
+        );
+
+    z-index: 1;
+}
+
+
+/* =========================================
+   BRAND CONTENT
+========================================= */
+
+.brand-content {
+
+    position: relative;
+
+    z-index: 2;
+
+    padding-left: 12%;
+
+    padding-right: 12%;
+
+    max-width: 700px;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.logo {
+
+    font-size: 64px;
+
+    font-weight: 750;
+
+    letter-spacing: -3px;
+
+    color: white;
+
+    margin-bottom: 28px;
+}
+
+
+.logo span {
+
+    color: #42c7ff;
+}
+
+
+/* =========================================
+   MAIN HEADING
+========================================= */
+
+.brand-content h1 {
+
+    font-size: clamp(38px, 4vw, 58px);
+
+    line-height: 1.1;
+
+    font-weight: 650;
+
+    color: white;
+
+    letter-spacing: -1.5px;
+
+    margin-bottom: 22px;
+}
+
+
+/* =========================================
+   TAGLINE
+========================================= */
+
+.tagline {
+
+    color: #e0f2fe;
+
+    font-size: 21px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+
+    max-width: 480px;
+
+    margin-bottom: 16px;
+}
+
+
+/* =========================================
+   DESCRIPTION
+========================================= */
+
+.description {
+
+    color: #b8cbe0;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+
+    max-width: 490px;
+}
+
+
+/* =========================================
+   RIGHT SECTION
+========================================= */
+
+.right-section {
+
+    width: 61%;
+
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 40px;
+
+    position: relative;
+
+    /*
+       Gradient similar to your picture
+    */
+
+    background:
+        linear-gradient(
+            135deg,
+            #7745f5 0%,
+            #6978ed 50%,
+            #4cc9e8 100%
+        );
+}
+
+
+/* =========================================
+   GRADIENT LIGHT EFFECT
+========================================= */
+
+.right-section::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 500px;
+
+    height: 500px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.12),
+            transparent 70%
+        );
+
+    top: -200px;
+
+    right: -180px;
+}
+
+
+/* =========================================
+   LOGIN CARD
+========================================= */
+
+.login-card {
+
+    width: 100%;
+
+    max-width: 450px;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    padding: 38px;
+
+    border-radius: 25px;
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.22);
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================
+   TABS
+========================================= */
+
+.tabs {
+
+    display: flex;
+
+    padding: 5px;
+
+    background: #edf2f7;
+
+    border-radius: 40px;
+
+    margin-bottom: 35px;
+}
+
+
+.tab {
+
+    flex: 1;
+
+    border: none;
+
+    padding: 12px;
+
+    border-radius: 30px;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+
+.tab.active {
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2388f5,
+            #155de8
+        );
+
+    box-shadow:
+        0 5px 15px rgba(21, 93, 232, 0.25);
+}
+
+
+/* =========================================
+   HEADING
+========================================= */
+
+.heading {
+
+    text-align: center;
+
+    margin-bottom: 28px;
+}
+
+
+.heading h2 {
+
+    color: #17233d;
+
+    font-size: 28px;
+
+    margin-bottom: 8px;
+
+    font-weight: 700;
+}
+
+
+.heading p {
+
+    color: #718096;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 17px;
+}
+
+
+/* =========================================
+   INPUT GROUP
+========================================= */
+
+.input-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.input-group label {
+
+    color: #334155;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.input-group input {
+
+    width: 100%;
+
+    height: 51px;
+
+    padding: 0 15px;
+
+    border: 1px solid #d8e1ed;
+
+    border-radius: 10px;
+
+    background: #fbfdff;
+
+    color: #1e293b;
+
+    outline: none;
+
+    font-size: 14px;
+
+    transition: 0.25s;
+}
+
+
+.input-group input::placeholder {
+
+    color: #a2afbf;
+}
+
+
+.input-group input:focus {
+
+    border-color: #358af5;
+
+    background: white;
+
+    box-shadow:
+        0 0 0 4px rgba(53, 138, 245, 0.10);
+}
+
+
+/* =========================================
+   OPTIONS
+========================================= */
+
+.options {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 12px;
+
+    margin-top: -2px;
+}
+
+
+.options label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color: #64748b;
+
+    cursor: pointer;
+}
+
+
+.options input {
+
+    accent-color: #2563eb;
+}
+
+
+.options a {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.login-button {
+
+    width: 100%;
+
+    height: 51px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #1685f5,
+            #1559e8
+        );
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 650;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    box-shadow:
+        0 8px 20px rgba(21, 94, 232, 0.25);
+
+    transition: 0.25s;
+}
+
+
+.login-button span {
+
+    font-size: 20px;
+
+    transition: 0.2s;
+}
+
+
+.login-button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 25px rgba(21, 94, 232, 0.35);
+}
+
+
+.login-button:hover span {
+
+    transform: translateX(4px);
+}
+
+
+/* =========================================
+   MESSAGE
+========================================= */
+
+.message {
+
+    min-height: 20px;
+
+    text-align: center;
+
+    margin-top: 14px;
+
+    color: #2563eb;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   SWITCH TEXT
+========================================= */
+
+.switch-text {
+
+    text-align: center;
+
+    color: #718096;
+
+    font-size: 13px;
+
+    margin-top: 22px;
+}
+
+
+.switch-text span {
+
+    color: #176ee8;
+
+    font-weight: 650;
+
+    cursor: pointer;
+}
+
+
+.switch-text span:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   SECURITY
+========================================= */
+
+.security {
+
+    text-align: center;
+
+    color: #9aa7b8;
+
+    font-size: 10px;
+
+    margin-top: 28px;
+}
+
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 900px) {
+
+    .left-section {
+
+        width: 50%;
+    }
+
+    .right-section {
+
+        width: 50%;
+
+        padding: 25px;
+    }
+
+    .brand-content {
+
+        padding-left: 9%;
+
+        padding-right: 7%;
+    }
+
+    .logo {
+
+        font-size: 52px;
+    }
+
+    .brand-content h1 {
+
+        font-size: 40px;
+    }
+
+}
+
+
+/* =========================================
+   TABLET / MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .page {
+
+        flex-direction: column;
+    }
+
+    .left-section {
+
+        width: 100%;
+
+        min-height: 440px;
+
+        align-items: center;
+    }
+
+    .brand-content {
+
+        padding: 60px 30px 40px;
+
+        text-align: center;
+    }
+
+    .logo {
+
+        font-size: 52px;
+
+        margin-bottom: 20px;
+    }
+
+    .brand-content h1 {
+
+        font-size: 38px;
+    }
+
+    .tagline {
+
+        font-size: 17px;
+
+        margin-left: auto;
+
+        margin-right: auto;
+    }
+
+    .description {
+
+        margin-left: auto;
+
+        margin-right: auto;
+    }
+
+    .right-section {
+
+        width: 100%;
+
+        min-height: auto;
+
+        padding: 35px 20px;
+    }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 430px) {
+
+    .left-section {
+
+        min-height: 390px;
+    }
+
+    .brand-content {
+
+        padding: 45px 20px 35px;
+    }
+
+    .logo {
+
+        font-size: 45px;
+    }
+
+    .brand-content h1 {
+
+        font-size: 32px;
+    }
+
+    .tagline {
+
+        font-size: 15px;
+    }
+
+    .description {
+
+        font-size: 13px;
+    }
+
+    .login-card {
+
+        padding: 25px 20px;
+
+        border-radius: 20px;
+    }
+
+    .heading h2 {
+
+        font-size: 24px;
+    }
+
+}

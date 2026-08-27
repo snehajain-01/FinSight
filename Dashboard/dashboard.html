@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>FinSight Dashboard</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+
+</head>
+
+
+<body>
+
+    <div class="dashboard-container">
+
+
+        <!-- =====================================
+             LEFT NAVIGATION BAR
+        ====================================== -->
+
+        <aside class="sidebar">
+
+            <!-- Logo -->
+
+            <div class="sidebar-logo">
+
+                <div class="logo">
+                    Fin<span>Sight</span>
+                </div>
+
+                <p>Financial Intelligence</p>
+
+            </div>
+
+
+            <!-- Navigation -->
+
+            <nav class="navigation">
+
+                <button
+                    class="nav-item active"
+                    onclick="showSection('dashboard', this)">
+
+                    <span class="nav-icon">⌂</span>
+
+                    <span>Dashboard</span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    onclick="showSection('upload', this)">
+
+                    <span class="nav-icon">↑</span>
+
+                    <span>Upload Document</span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    onclick="showSection('transactions', this)">
+
+                    <span class="nav-icon">▤</span>
+
+                    <span>Transactions</span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    onclick="showSection('insights', this)">
+
+                    <span class="nav-icon">◔</span>
+
+                    <span>Insights</span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    onclick="showSection('recommendations', this)">
+
+                    <span class="nav-icon">✦</span>
+
+                    <span>Recommendations</span>
+
+                </button>
+
+            </nav>
+
+
+            <!-- Bottom -->
+
+            <div class="sidebar-bottom">
+
+                <div class="user-box">
+
+                    <div class="user-avatar">
+                        U
+                    </div>
+
+                    <div class="user-info">
+
+                        <strong>User</strong>
+
+                        <span>FinSight Account</span>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="logout-button"
+                    onclick="logout()">
+
+                    <span>↪</span>
+
+                    Logout
+
+                </button>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =====================================
+             MAIN CONTENT
+        ====================================== -->
+
+        <main class="main-content">
+
+
+            <!-- TOP BAR -->
+
+            <header class="topbar">
+
+                <div>
+
+                    
+
+                    <h1 id="pageTitle">
+                        Dashboard
+                    </h1>
+
+                </div>
+
+
+                <div class="topbar-right">
+
+                    
+
+                    <div class="profile-circle">
+                        U
+                    </div>
+
+                </div>
+
+            </header>
+
+
+
+            <!-- =================================
+                 DASHBOARD SECTION
+            ================================== -->
+
+            <section
+                id="dashboard"
+                class="content-section active-section">
+
+                <div class="welcome-card">
+
+                    <div class="welcome-text">
+
+                        <span class="small-label">
+                            WELCOME TO FINSIGHT
+                        </span>
+
+                        <h2>
+                            Understand. Analyze. Improve.
+                        </h2>
+
+                        <p>
+                            Upload your financial documents
+                            to begin organizing and understanding
+                            your transactions.
+                        </p>
+
+                    </div>
+
+
+                    <div class="welcome-icon">
+
+                        <div class="icon-circle">
+                            ✦
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Empty overview cards -->
+
+                <div class="section-heading">
+
+                    <div>
+                        <h2>Overview</h2>
+
+                        <p>
+                            Your financial information will
+                            appear here after processing.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="overview-grid">
+
+                    <div class="overview-card">
+
+                        <div class="card-icon blue">
+                            ₹
+                        </div>
+
+                        <span>Total Spending</span>
+
+                        <strong>—</strong>
+
+                        <small>
+                            No data available
+                        </small>
+
+                    </div>
+
+
+                    <div class="overview-card">
+
+                        <div class="card-icon purple">
+                            ▤
+                        </div>
+
+                        <span>Transactions</span>
+
+                        <strong>—</strong>
+
+                        <small>
+                            No transactions yet
+                        </small>
+
+                    </div>
+
+
+                    <div class="overview-card">
+
+                        <div class="card-icon cyan">
+                            ◔
+                        </div>
+
+                        <span>Insights</span>
+
+                        <strong>—</strong>
+
+                        <small>
+                            Waiting for data
+                        </small>
+
+                    </div>
+
+
+                    <div class="overview-card">
+
+                        <div class="card-icon violet">
+                            ✦
+                        </div>
+
+                        <span>Recommendations</span>
+
+                        <strong>—</strong>
+
+                        <small>
+                            Will appear here
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Getting Started -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ↑
+                    </div>
+
+                    <h3>
+                        Start by uploading a document
+                    </h3>
+
+                    <p>
+                        Upload a bank statement or financial
+                        document to extract and categorize
+                        your transactions.
+                    </p>
+
+                    <button
+                        onclick="showSectionByName('upload')">
+
+                        Upload Document
+                        <span>→</span>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 UPLOAD SECTION
+            ================================== -->
+
+            <section
+                id="upload"
+                class="content-section">
+
+                <div class="page-intro">
+
+                    <span class="small-label">
+                        DOCUMENT PROCESSING
+                    </span>
+
+                    
+
+                    <p>
+                        Upload your financial document to
+                        extract transaction information.
+                    </p>
+
+                </div>
+
+
+                <div class="upload-box">
+
+                    <div class="upload-icon">
+                        ↑
+                    </div>
+
+                   
+
+                    <p>
+                        Your uploaded documents will be
+                        processed and analyzed here.
+                    </p>
+
+                    <button>
+                        Choose Document
+                    </button>
+
+                    <small>
+                        PDF, JPG or PNG
+                    </small>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 TRANSACTIONS SECTION
+            ================================== -->
+
+            <section
+                id="transactions"
+                class="content-section">
+
+                <div class="page-intro">
+
+                    <span class="small-label">
+                        TRANSACTION HISTORY
+                    </span>
+
+                    
+
+                    <p>
+                        Your categorized financial transactions
+                        will appear here.
+                    </p>
+
+                </div>
+
+
+                <div class="empty-table">
+
+                    <div class="table-icon">
+                        ▤
+                    </div>
+
+                    <h3>
+                        No transactions yet
+                    </h3>
+
+                    <p>
+                        Upload a document to start building
+                        your transaction history.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 INSIGHTS SECTION
+            ================================== -->
+
+            <section
+                id="insights"
+                class="content-section">
+
+                <div class="page-intro">
+
+                    <span class="small-label">
+                        FINANCIAL ANALYSIS
+                    </span>
+
+                    
+
+                    <p>
+                        Personalized insights based on your
+                        spending patterns will appear here.
+                    </p>
+
+                </div>
+
+
+                <div class="empty-table">
+
+                    <div class="table-icon">
+                        ◔
+                    </div>
+
+                    <h3>
+                        Insights are not available yet
+                    </h3>
+
+                    <p>
+                        Process some transactions first to
+                        generate meaningful financial insights.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 RECOMMENDATIONS SECTION
+            ================================== -->
+
+            <section
+                id="recommendations"
+                class="content-section">
+
+                <div class="page-intro">
+
+                    <span class="small-label">
+                        SMART FINANCIAL GUIDANCE
+                    </span>
+
+                    
+
+                    <p>
+                        Personalized financial recommendations
+                        will be generated from your transaction
+                        history.
+                    </p>
+
+                </div>
+
+
+                <div class="empty-table">
+
+                    <div class="table-icon">
+                        ✦
+                    </div>
+
+                    <h3>
+                        Recommendations will appear here
+                    </h3>
+
+                    <p>
+                        Add your transaction data to receive
+                        personalized recommendations.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+    <script src="dashboard.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>FinSight - Login</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Main page -->
+    <div class="page">
+
+        <!-- =====================================
+             LEFT SIDE - FINSIGHT INFORMATION
+        ====================================== -->
+
+        <div class="left-section">
+
+            <div class="brand-content">
+
+                <div class="logo">
+                    Fin<span>Sight</span>
+                </div>
+
+                <h1>
+                    Your Money.<br>
+                    Your Insights.
+                </h1>
+
+                <p class="tagline">
+                    Understand your spending. Make smarter
+                    financial decisions.
+                </p>
+
+                <p class="description">
+                    FinSight helps you organize your financial
+                    transactions and turn everyday spending
+                    into meaningful insights.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================
+             RIGHT SIDE - LOGIN / REGISTER
+        ====================================== -->
+
+        <div class="right-section">
+
+            <div class="login-card">
+
+                <!-- Tabs -->
+
+                <div class="tabs">
+
+                    <button
+                        id="loginTab"
+                        class="tab active"
+                        onclick="showLogin()">
+
+                        Login
+
+                    </button>
+
+                    <button
+                        id="registerTab"
+                        class="tab"
+                        onclick="showRegister()">
+
+                        Register
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================
+                     LOGIN FORM
+                ================================== -->
+
+                <div id="loginSection">
+
+                    <div class="heading">
+
+                        <h2>Welcome Back</h2>
+
+                        <p>
+                            Login to continue to FinSight
+                        </p>
+
+                    </div>
+
+
+                    <form id="loginForm">
+
+                        <div class="input-group">
+
+                            <label for="loginEmail">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="loginEmail"
+                                placeholder="Enter your email"
+                                required>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label for="loginPassword">
+                                Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="loginPassword"
+                                placeholder="Enter your password"
+                                required>
+
+                        </div>
+
+
+                        <div class="options">
+
+                            <label>
+                                <input type="checkbox">
+                                Remember me
+                            </label>
+
+                            <a href="#">
+                                Forgot password?
+                            </a>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="login-button">
+
+                            Login
+                            <span>→</span>
+
+                        </button>
+
+                    </form>
+
+
+                    <p id="loginMessage"
+                       class="message">
+                    </p>
+
+
+                    <p class="switch-text">
+
+                        Don't have an account?
+
+                        <span onclick="showRegister()">
+                            Register
+                        </span>
+
+                    </p>
+
+                </div>
+
+
+                <!-- =================================
+                     REGISTER FORM
+                ================================== -->
+
+                <div id="registerSection"
+                     style="display: none;">
+
+                    <div class="heading">
+
+                        <h2>Create Account</h2>
+
+                        <p>
+                            Start your journey with FinSight
+                        </p>
+
+                    </div>
+
+
+                    <form id="registerForm">
+
+                        <div class="input-group">
+
+                            <label for="registerName">
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="registerName"
+                                placeholder="Enter your name"
+                                required>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label for="registerEmail">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="registerEmail"
+                                placeholder="Enter your email"
+                                required>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label for="registerPassword">
+                                Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="registerPassword"
+                                placeholder="Create a password"
+                                required>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="login-button">
+
+                            Create Account
+                            <span>→</span>
+
+                        </button>
+
+                    </form>
+
+
+                    <p id="registerMessage"
+                       class="message">
+                    </p>
+
+
+                    <p class="switch-text">
+
+                        Already have an account?
+
+                        <span onclick="showLogin()">
+                            Login
+                        </span>
+
+                    </p>
+
+                </div>
+
+
+                
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
