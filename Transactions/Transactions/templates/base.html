@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>
+        FinSight
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+    <h2>
+        FinSight
+    </h2>
+
+
+    {% if session.get("user_id") %}
+
+
+        <a href="{{ url_for('upload') }}">
+            Upload
+        </a>
+
+
+        <a href="{{ url_for('transactions') }}">
+            Transactions
+        </a>
+
+
+        <a href="{{ url_for('logout') }}">
+            Logout
+        </a>
+
+
+    {% endif %}
+
+
+</nav>
+
+
+<div class="container">
+
+
+    {% with messages = get_flashed_messages() %}
+
+
+        {% if messages %}
+
+
+            {% for message in messages %}
+
+
+                <p class="message">
+
+                    {{ message }}
+
+                </p>
+
+
+            {% endfor %}
+
+
+        {% endif %}
+
+
+    {% endwith %}
+
+
+    {% block content %}
+
+    {% endblock %}
+
+
+</div>
+
+
+</body>
+
+</html>

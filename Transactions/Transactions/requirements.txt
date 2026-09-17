@@ -1,0 +1,11 @@
+Flask
+flask-cors
+python-dotenv
+bcrypt
+pytesseract
+Pillow
+mysql-connector-python
+pymongo
+pypdf
+scikit-learn
+joblib

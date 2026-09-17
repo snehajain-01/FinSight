@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>
+        Upload Bank Statement
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<h1>
+    Upload Bank Statement
+</h1>
+
+
+{% with messages = get_flashed_messages() %}
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <p>
+
+                {{ message }}
+
+            </p>
+
+        {% endfor %}
+
+    {% endif %}
+
+{% endwith %}
+
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+
+    <input
+        type="file"
+        name="file"
+        accept=".pdf,.png,.jpg,.jpeg"
+        required
+    >
+
+
+    <br><br>
+
+
+    <button type="submit">
+
+        Upload and Extract
+
+    </button>
+
+
+</form>
+
+
+</body>
+
+</html>

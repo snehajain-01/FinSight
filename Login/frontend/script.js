@@ -1,4 +1,6 @@
-const BACKEND_URL = "http://localhost:4000";
+// Login page is now served by the same Flask app that hosts the API,
+// so requests can just use relative paths.
+const BACKEND_URL = "";
 
 
 // =========================================
@@ -54,7 +56,7 @@ document
         try {
 
             const response = await fetch(
-                `${BACKEND_URL}/register`,
+                `${BACKEND_URL}/api/register`,
                 {
                     method: "POST",
 
@@ -122,7 +124,7 @@ document
         try {
 
             const response = await fetch(
-                `${BACKEND_URL}/login`,
+                `${BACKEND_URL}/api/login`,
                 {
                     method: "POST",
 
@@ -156,12 +158,13 @@ document
                 console.log("LOGIN SUCCESS");
                 console.log("Server response:", data);
 
-                // Test whether login itself is successful
-                
+                // The server has already set a signed session cookie
+                // identifying this user - the Dashboard reads it via
+                // /api/me, so there's nothing to store client-side.
 
                 // Open Dashboard
                 window.location.href =
-                    "http://localhost:3000/Dashboard/dashboard.html";
+                    "/dashboard.html";
             }
 
         } catch (error) {

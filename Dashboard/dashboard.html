@@ -78,6 +78,19 @@
 
                 <button
                     class="nav-item"
+                    onclick="showSection('confirmCategories', this)">
+
+                    <span class="nav-icon">✓</span>
+
+                    <span>Confirm Categories</span>
+
+                    <span class="nav-badge" id="reviewBadge" hidden></span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
                     onclick="showSection('insights', this)">
 
                     <span class="nav-icon">◔</span>
@@ -106,15 +119,15 @@
 
                 <div class="user-box">
 
-                    <div class="user-avatar">
+                    <div class="user-avatar" id="userAvatar">
                         U
                     </div>
 
                     <div class="user-info">
 
-                        <strong>User</strong>
+                        <strong id="userName">User</strong>
 
-                        <span>FinSight Account</span>
+                        <span id="userEmail">FinSight Account</span>
 
                     </div>
 
@@ -163,7 +176,7 @@
 
                     
 
-                    <div class="profile-circle">
+                    <div class="profile-circle" id="profileCircle">
                         U
                     </div>
 
@@ -240,9 +253,9 @@
 
                         <span>Total Spending</span>
 
-                        <strong>—</strong>
+                        <strong id="statTotalSpending">—</strong>
 
-                        <small>
+                        <small id="statTotalSpendingHint">
                             No data available
                         </small>
 
@@ -257,9 +270,9 @@
 
                         <span>Transactions</span>
 
-                        <strong>—</strong>
+                        <strong id="statTransactionCount">—</strong>
 
-                        <small>
+                        <small id="statTransactionCountHint">
                             No transactions yet
                         </small>
 
@@ -359,25 +372,35 @@
                 </div>
 
 
-                <div class="upload-box">
+                <div class="upload-box" id="uploadBox">
 
                     <div class="upload-icon">
                         ↑
                     </div>
 
-                   
-
-                    <p>
+                    <p id="uploadStatusText">
                         Your uploaded documents will be
                         processed and analyzed here.
                     </p>
 
-                    <button>
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        hidden>
+
+                    <button
+                        type="button"
+                        id="chooseDocumentButton"
+                        onclick="document.getElementById('fileInput').click()">
+
                         Choose Document
+
                     </button>
 
                     <small>
-                        PDF, JPG or PNG
+                        PDF bank statement, or a payment screenshot
+                        (PNG/JPG)
                     </small>
 
                 </div>
@@ -410,7 +433,7 @@
                 </div>
 
 
-                <div class="empty-table">
+                <div class="empty-table" id="transactionsEmpty">
 
                     <div class="table-icon">
                         ▤
@@ -426,6 +449,72 @@
                     </p>
 
                 </div>
+
+
+                <div
+                    class="transactions-table-wrap"
+                    id="transactionsTableWrap"
+                    style="display: none;">
+
+                    <div class="transactions-toolbar">
+
+                        <div class="filter-field">
+                            <label for="transactionsSortOrder">Sort by date</label>
+                            <select id="transactionsSortOrder">
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <table class="transactions-table">
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Merchant</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="transactionsTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 CONFIRM CATEGORIES SECTION
+            ================================== -->
+
+            <section
+                id="confirmCategories"
+                class="content-section">
+
+                <div class="page-intro">
+
+                    <span class="small-label">
+                        CATEGORY REVIEW
+                    </span>
+
+                    <p>
+                        Confirm categories for transactions we're not
+                        confident about. Once you pick a category for
+                        a merchant, we'll remember it and won't ask
+                        again.
+                    </p>
+
+                </div>
+
+                <div id="confirmQueueArea"></div>
 
             </section>
 
@@ -445,17 +534,15 @@
                         FINANCIAL ANALYSIS
                     </span>
 
-                    
-
                     <p>
                         Personalized insights based on your
-                        spending patterns will appear here.
+                        actual spending patterns.
                     </p>
 
                 </div>
 
 
-                <div class="empty-table">
+                <div class="empty-table" id="insightsEmpty">
 
                     <div class="table-icon">
                         ◔
@@ -466,9 +553,146 @@
                     </h3>
 
                     <p>
-                        Process some transactions first to
-                        generate meaningful financial insights.
+                        Upload a document to start building
+                        your financial insights.
                     </p>
+
+                </div>
+
+
+                <div id="insightsContent" hidden>
+
+                    <!-- Filters -->
+
+                    <div class="insights-filters">
+
+                        <div class="filter-field">
+                            <label for="insightsMonthFilter">Month</label>
+                            <select id="insightsMonthFilter"></select>
+                        </div>
+
+                        <div class="filter-field">
+                            <label for="insightsCategoryFilter">Category</label>
+                            <select id="insightsCategoryFilter"></select>
+                        </div>
+
+                        <div class="filter-field">
+                            <label for="insightsFromFilter">From</label>
+                            <input type="date" id="insightsFromFilter">
+                        </div>
+
+                        <div class="filter-field">
+                            <label for="insightsToFilter">To</label>
+                            <input type="date" id="insightsToFilter">
+                        </div>
+
+                        <button
+                            type="button"
+                            id="insightsResetFilters"
+                            class="insights-reset-btn">
+                            Reset
+                        </button>
+
+                    </div>
+
+
+                    <!-- Stat tiles -->
+
+                    <div class="overview-grid" id="insightsStatGrid">
+
+                        <div class="overview-card">
+                            <div class="card-icon blue">₹</div>
+                            <span>Total Spending</span>
+                            <strong id="insightsTotalSpending">—</strong>
+                            <small id="insightsTotalSpendingHint">No data</small>
+                        </div>
+
+                        <div class="overview-card">
+                            <div class="card-icon purple">▤</div>
+                            <span>Transactions</span>
+                            <strong id="insightsTransactionCount">—</strong>
+                            <small id="insightsTransactionCountHint">No data</small>
+                        </div>
+
+                        <div class="overview-card">
+                            <div class="card-icon cyan">÷</div>
+                            <span>Average Spending</span>
+                            <strong id="insightsAverageSpending">—</strong>
+                            <small id="insightsAverageSpendingHint">No data</small>
+                        </div>
+
+                        <div class="overview-card">
+                            <div class="card-icon violet">✦</div>
+                            <span>Top Category</span>
+                            <strong id="insightsTopCategory">—</strong>
+                            <small id="insightsTopCategoryHint">No data</small>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Where did my money go -->
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Where Did My Money Go?</h2>
+                            <p>Spending broken down by category</p>
+                        </div>
+                    </div>
+
+                    <div class="insights-money-grid">
+
+                        <div class="chart-card">
+                            <h3 class="chart-card-title">By share</h3>
+                            <div id="insightsDonutChart" class="chart-body"></div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3 class="chart-card-title">By amount</h3>
+                            <div id="insightsBarChart" class="chart-body"></div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Spending trends -->
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Spending Trends</h2>
+                            <p>How your spending has moved over time</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div id="insightsLineChart" class="chart-body"></div>
+                    </div>
+
+
+                    <!-- Top expenses -->
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Top Expenses</h2>
+                            <p>Your biggest individual transactions</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div id="insightsTopExpenses" class="top-expenses-list"></div>
+                    </div>
+
+
+                    <!-- Personalized insights -->
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Personalized Insights</h2>
+                            <p>What your data is telling you</p>
+                        </div>
+                    </div>
+
+                    <div id="insightsCards" class="insight-cards-grid"></div>
 
                 </div>
 
@@ -490,18 +714,15 @@
                         SMART FINANCIAL GUIDANCE
                     </span>
 
-                    
-
                     <p>
                         Personalized financial recommendations
-                        will be generated from your transaction
-                        history.
+                        generated from your transaction history.
                     </p>
 
                 </div>
 
 
-                <div class="empty-table">
+                <div class="empty-table" id="recommendationsEmpty">
 
                     <div class="table-icon">
                         ✦
@@ -517,6 +738,9 @@
                     </p>
 
                 </div>
+
+
+                <div id="recommendationsCards" class="insight-cards-grid" hidden></div>
 
             </section>
 

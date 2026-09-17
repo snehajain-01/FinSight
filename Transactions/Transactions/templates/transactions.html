@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Extracted Transactions</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+    <h1>Extracted Transactions</h1>
+
+    <h3>
+        File: {{ filename }}
+    </h3>
+
+
+    {% if transactions %}
+
+        <table border="1" cellpadding="10">
+
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Merchant</th>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+
+
+            {% for transaction in transactions %}
+
+            <tr>
+
+                <td>
+                    {{ transaction.date }}
+                </td>
+
+                <td>
+                    {{ transaction.time }}
+                </td>
+
+                <td>
+                    {{ transaction.merchant }}
+                </td>
+
+                <td>
+                    {{ transaction.type }}
+                </td>
+
+                <td>
+                    ₹{{ transaction.amount }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    {% else %}
+
+        <p>No transactions could be extracted.</p>
+
+    {% endif %}
+
+
+    <br>
+
+    <a href="{{ url_for('upload') }}">
+        Upload Another Statement
+    </a>
+
+</body>
+
+</html>
