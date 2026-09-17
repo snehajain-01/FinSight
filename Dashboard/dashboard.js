@@ -1906,16 +1906,16 @@ function renderInsights() {
 // this stays on the existing FinSight look rather than inventing a
 // new pattern.
 const RECOMMENDATION_META = {
-    overspend: { icon: "!", color: "amber", tag: "Overspending alert" },
-    budget: { icon: "₹", color: "blue", tag: "Budget suggestion" },
-    savings: { icon: "◔", color: "green", tag: "Saving opportunity" },
-    unusual: { icon: "✱", color: "amber", tag: "Unusual spending" },
-    recurring: { icon: "↻", color: "purple", tag: "Recurring payment" },
-    trend: { icon: "↑", color: "amber", tag: "Spending trend" },
-    review: { icon: "✓", color: "amber", tag: "Action needed" },
-    cashflow: { icon: "⇄", color: "blue", tag: "Cash flow" },
-    smallSpends: { icon: "▤", color: "cyan", tag: "Spending habit" },
-    balanced: { icon: "✦", color: "violet", tag: "Positive habit" }
+    overspend: { icon: "⚠️", color: "amber", tag: "Attention" },
+    budget: { icon: "🎯", color: "blue", tag: "Budget suggestion" },
+    savings: { icon: "💰", color: "green", tag: "Saving opportunity" },
+    unusual: { icon: "⚠️", color: "amber", tag: "Attention" },
+    recurring: { icon: "🔄", color: "purple", tag: "Recurring payments" },
+    trend: { icon: "📈", color: "amber", tag: "Spending pattern" },
+    review: { icon: "⚠️", color: "amber", tag: "Attention" },
+    cashflow: { icon: "⚠️", color: "blue", tag: "Attention" },
+    smallSpends: { icon: "💰", color: "cyan", tag: "Saving opportunity" },
+    balanced: { icon: "✨", color: "violet", tag: "Good habit" }
 };
 
 function generateRecommendations(allTransactions) {
@@ -2331,6 +2331,7 @@ function generateRecommendations(allTransactions) {
 function renderRecommendations() {
 
     const emptyState = document.getElementById("recommendationsEmpty");
+    const banner = document.getElementById("recommendationsBanner");
     const cardsContainer = document.getElementById("recommendationsCards");
 
     const recommendations = transactions.length
@@ -2339,11 +2340,13 @@ function renderRecommendations() {
 
     if (!recommendations.length) {
         emptyState.style.display = "flex";
+        banner.hidden = true;
         cardsContainer.hidden = true;
         return;
     }
 
     emptyState.style.display = "none";
+    banner.hidden = false;
     cardsContainer.hidden = false;
     cardsContainer.innerHTML = "";
 
@@ -2354,15 +2357,24 @@ function renderRecommendations() {
         const card = document.createElement("div");
         card.className = "recommendation-card";
 
-        const icon = document.createElement("div");
-        icon.className = `card-icon ${meta.color}`;
+        const tagRow = document.createElement("div");
+        tagRow.className = "recommendation-tag-row";
+
+        const icon = document.createElement("span");
+        icon.className = "recommendation-emoji";
         icon.textContent = meta.icon;
-        card.appendChild(icon);
+        tagRow.appendChild(icon);
 
         const tag = document.createElement("span");
-        tag.className = "recommendation-tag";
+        tag.className = `recommendation-tag ${meta.color}`;
         tag.textContent = meta.tag;
-        card.appendChild(tag);
+        tagRow.appendChild(tag);
+
+        card.appendChild(tagRow);
+
+        const divider = document.createElement("div");
+        divider.className = "recommendation-divider";
+        card.appendChild(divider);
 
         const title = document.createElement("h4");
         title.textContent = recommendation.title;
@@ -2380,7 +2392,12 @@ function renderRecommendations() {
 
         const text = document.createElement("p");
         text.className = "recommendation-text";
-        text.textContent = recommendation.text;
+
+        const actionLabel = document.createElement("span");
+        actionLabel.textContent = "Suggested action: ";
+        text.appendChild(actionLabel);
+        text.appendChild(document.createTextNode(recommendation.text));
+
         card.appendChild(text);
 
         if (
@@ -2392,7 +2409,7 @@ function renderRecommendations() {
             savings.className = "recommendation-savings";
 
             const savingsLabel = document.createElement("span");
-            savingsLabel.textContent = recommendation.savingsLabel || "Potential savings";
+            savingsLabel.textContent = recommendation.savingsLabel || "Potential saving";
             savings.appendChild(savingsLabel);
 
             const savingsValue = document.createElement("strong");

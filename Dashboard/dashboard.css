@@ -2340,6 +2340,61 @@ td:has(.category-review-flag) .category-select {
    RECOMMENDATIONS
 ========================================= */
 
+.recommendations-banner {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 20px 22px;
+
+    border-radius: 15px;
+
+    margin-bottom: 18px;
+
+    border: 1px solid rgba(133, 166, 204, 0.10);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(57, 135, 229, 0.10),
+            rgba(144, 133, 233, 0.06)
+        );
+
+}
+
+
+.recommendations-banner-icon {
+
+    font-size: 26px;
+
+    line-height: 1;
+
+}
+
+
+.recommendations-banner h3 {
+
+    font-size: 15px;
+
+    color: white;
+
+    margin-bottom: 3px;
+
+}
+
+
+.recommendations-banner p {
+
+    font-size: 12px;
+
+    color: #8da4c0;
+
+}
+
+
 .recommendation-card {
 
     padding: 22px;
@@ -2364,9 +2419,24 @@ td:has(.category-review-flag) .category-select {
 }
 
 
-.recommendation-card .card-icon {
+.recommendation-tag-row {
 
-    margin-bottom: 14px;
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 12px;
+
+}
+
+
+.recommendation-emoji {
+
+    font-size: 15px;
+
+    line-height: 1;
 
 }
 
@@ -2375,7 +2445,7 @@ td:has(.category-review-flag) .category-select {
 
     display: inline-block;
 
-    font-size: 9px;
+    font-size: 10px;
 
     font-weight: 700;
 
@@ -2385,7 +2455,53 @@ td:has(.category-review-flag) .category-select {
 
     color: #8da4c0;
 
-    margin-bottom: 6px;
+    padding: 4px 10px;
+
+    border-radius: 20px;
+
+    background: rgba(133, 166, 204, 0.12);
+
+}
+
+
+.recommendation-tag.blue {
+    color: #54b4ff;
+    background: rgba(30, 135, 245, 0.16);
+}
+
+.recommendation-tag.purple {
+    color: #a884ff;
+    background: rgba(131, 82, 239, 0.16);
+}
+
+.recommendation-tag.cyan {
+    color: #53d8ec;
+    background: rgba(35, 193, 220, 0.14);
+}
+
+.recommendation-tag.violet {
+    color: #b18aff;
+    background: rgba(142, 86, 238, 0.16);
+}
+
+.recommendation-tag.amber {
+    color: #f5b95a;
+    background: rgba(245, 185, 90, 0.16);
+}
+
+.recommendation-tag.green {
+    color: #3fd39a;
+    background: rgba(63, 211, 154, 0.16);
+}
+
+
+.recommendation-divider {
+
+    height: 1px;
+
+    background: rgba(133, 166, 204, 0.14);
+
+    margin-bottom: 14px;
 
 }
 
@@ -2425,6 +2541,15 @@ td:has(.category-review-flag) .category-select {
     color: #607994;
 
     margin-bottom: 10px;
+
+}
+
+
+.recommendation-text span {
+
+    font-weight: 650;
+
+    color: #cfdcec;
 
 }
 

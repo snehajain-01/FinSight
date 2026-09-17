@@ -123,11 +123,23 @@
                                 Password
                             </label>
 
-                            <input
-                                type="password"
-                                id="loginPassword"
-                                placeholder="Enter your password"
-                                required>
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="loginPassword"
+                                    placeholder="Enter your password"
+                                    required>
+
+                                <button
+                                    type="button"
+                                    class="toggle-password"
+                                    aria-label="Show password"
+                                    onclick="togglePassword('loginPassword', this)">
+                                    👁
+                                </button>
+
+                            </div>
 
                         </div>
 
@@ -232,11 +244,23 @@
                                 Password
                             </label>
 
-                            <input
-                                type="password"
-                                id="registerPassword"
-                                placeholder="Create a password"
-                                required>
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="registerPassword"
+                                    placeholder="Create a password"
+                                    required>
+
+                                <button
+                                    type="button"
+                                    class="toggle-password"
+                                    aria-label="Show password"
+                                    onclick="togglePassword('registerPassword', this)">
+                                    👁
+                                </button>
+
+                            </div>
 
                         </div>
 

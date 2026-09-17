@@ -4,6 +4,24 @@ const BACKEND_URL = "";
 
 
 // =========================================
+// TOGGLE PASSWORD VISIBILITY
+// =========================================
+
+function togglePassword(inputId, button) {
+
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === "password";
+
+    input.type = isHidden ? "text" : "password";
+    button.textContent = isHidden ? "🙈" : "👁";
+    button.setAttribute(
+        "aria-label",
+        isHidden ? "Hide password" : "Show password"
+    );
+}
+
+
+// =========================================
 // SHOW LOGIN
 // =========================================
 
