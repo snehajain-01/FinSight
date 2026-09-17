@@ -126,6 +126,49 @@ def create_user(name, email, hashed_password):
 
 
 # --------------------------------
+# PASSWORD RESET - STORE OTP
+# --------------------------------
+
+def set_password_reset_otp(email, otp_hash, expires_at):
+
+    users_collection.update_one(
+        {
+            "email": email
+        },
+        {
+            "$set": {
+                "reset_otp_hash": otp_hash,
+                "reset_otp_expires": expires_at,
+                "updatedAt": datetime.now()
+            }
+        }
+    )
+
+
+# --------------------------------
+# PASSWORD RESET - UPDATE PASSWORD + CLEAR OTP
+# --------------------------------
+
+def reset_user_password(email, hashed_password):
+
+    users_collection.update_one(
+        {
+            "email": email
+        },
+        {
+            "$set": {
+                "password": hashed_password,
+                "updatedAt": datetime.now()
+            },
+            "$unset": {
+                "reset_otp_hash": "",
+                "reset_otp_expires": ""
+            }
+        }
+    )
+
+
+# --------------------------------
 # GET LEARNED MERCHANT -> CATEGORY MAP (for one user)
 # --------------------------------
 

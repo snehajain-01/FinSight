@@ -1,6 +1,9 @@
 import os
+import secrets
+import smtplib
 
-from datetime import timedelta
+from datetime import timedelta, datetime
+from email.mime.text import MIMEText
 
 import bcrypt
 
@@ -29,7 +32,9 @@ from database.database import (
     find_user_by_email,
     create_user,
     update_transaction_category,
-    save_merchant_category
+    save_merchant_category,
+    set_password_reset_otp,
+    reset_user_password
 )
 from services.pdf_service import extract_text_from_pdf
 from services.ocr_service import extract_text_from_image
@@ -82,6 +87,59 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 # Kept for local tools/tests that call the API from a different origin;
 # the app itself now serves the frontend and API from the same port.
 CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+
+# --------------------------------
+# PASSWORD RESET (OTP EMAIL) CONFIGURATION
+# --------------------------------
+
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SMTP_EMAIL = os.getenv("SMTP_EMAIL")
+SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
+
+OTP_LENGTH = 6
+OTP_VALID_MINUTES = 10
+
+
+def generate_otp():
+
+    return "".join(
+        str(secrets.randbelow(10)) for _ in range(OTP_LENGTH)
+    )
+
+
+def send_otp_email(to_email, otp):
+    """
+    Emails the OTP via Gmail SMTP. Returns True on success. If SMTP
+    credentials aren't configured (local/dev setup), logs the OTP to
+    the console instead so the reset flow can still be tested.
+    """
+
+    if not SMTP_EMAIL or not SMTP_APP_PASSWORD:
+
+        print(
+            f"[DEV] SMTP not configured - OTP for {to_email} is: {otp}"
+        )
+
+        return False
+
+    message = MIMEText(
+        f"Your FinSight password reset code is {otp}.\n"
+        f"It expires in {OTP_VALID_MINUTES} minutes. "
+        f"If you didn't request this, you can ignore this email."
+    )
+
+    message["Subject"] = "Your FinSight password reset code"
+    message["From"] = SMTP_EMAIL
+    message["To"] = to_email
+
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+
+        server.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
+        server.sendmail(SMTP_EMAIL, [to_email], message.as_string())
+
+    return True
 
 
 # --------------------------------
@@ -415,6 +473,133 @@ def api_login():
             "email": user["email"]
         }
     })
+
+
+# --------------------------------
+# JSON API - FORGOT PASSWORD (SEND OTP)
+# --------------------------------
+
+@app.route(
+    "/api/forgot-password",
+    methods=["POST"]
+)
+def api_forgot_password():
+
+    data = request.get_json(silent=True) or {}
+
+    email = (data.get("email") or "").strip()
+
+    if not email:
+
+        return jsonify({
+            "message": "Please enter your email"
+        }), 400
+
+
+    generic_message = (
+        "If that email is registered, a verification code has been sent."
+    )
+
+    user = find_user_by_email(email)
+
+    # Don't reveal whether the email exists - always return the same
+    # message, but only actually generate/send an OTP if it does.
+    if not user:
+
+        return jsonify({
+            "message": generic_message
+        }), 200
+
+
+    otp = generate_otp()
+
+    otp_hash = bcrypt.hashpw(
+        otp.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    expires_at = datetime.now() + timedelta(minutes=OTP_VALID_MINUTES)
+
+    set_password_reset_otp(email, otp_hash, expires_at)
+
+    try:
+        send_otp_email(email, otp)
+
+    except Exception as error:
+
+        print(f"Failed to send OTP email: {error}")
+
+    return jsonify({
+        "message": generic_message
+    }), 200
+
+
+# --------------------------------
+# JSON API - RESET PASSWORD (VERIFY OTP)
+# --------------------------------
+
+@app.route(
+    "/api/reset-password",
+    methods=["POST"]
+)
+def api_reset_password():
+
+    data = request.get_json(silent=True) or {}
+
+    email = (data.get("email") or "").strip()
+    otp = (data.get("otp") or "").strip()
+    new_password = data.get("newPassword") or ""
+
+    if not email or not otp or not new_password:
+
+        return jsonify({
+            "message": "Please fill all fields"
+        }), 400
+
+
+    if len(new_password) < 6:
+
+        return jsonify({
+            "message": "Password must be at least 6 characters"
+        }), 400
+
+
+    user = find_user_by_email(email)
+
+    otp_hash = user.get("reset_otp_hash") if user else None
+    otp_expires = user.get("reset_otp_expires") if user else None
+
+    if not user or not otp_hash or not otp_expires:
+
+        return jsonify({
+            "message": "Invalid or expired code"
+        }), 400
+
+
+    if datetime.now() > otp_expires:
+
+        return jsonify({
+            "message": "This code has expired. Please request a new one."
+        }), 400
+
+
+    if not bcrypt.checkpw(otp.encode("utf-8"), otp_hash.encode("utf-8")):
+
+        return jsonify({
+            "message": "Incorrect code"
+        }), 400
+
+
+    hashed_password = bcrypt.hashpw(
+        new_password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    reset_user_password(email, hashed_password)
+
+    return jsonify({
+        "message": "Password reset successful. You can now log in."
+    }), 200
 
 
 # --------------------------------

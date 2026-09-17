@@ -151,7 +151,7 @@
                                 Remember me
                             </label>
 
-                            <a href="#">
+                            <a href="#" onclick="showForgot(); return false;">
                                 Forgot password?
                             </a>
 
@@ -295,7 +295,171 @@
                 </div>
 
 
-                
+                <!-- =================================
+                     FORGOT PASSWORD
+                ================================== -->
+
+                <div id="forgotSection"
+                     style="display: none;">
+
+                    <div class="heading">
+
+                        <h2>Reset Password</h2>
+
+                        <p id="forgotSubheading">
+                            Enter your email to receive a verification code
+                        </p>
+
+                    </div>
+
+
+                    <!-- STEP 1: request the OTP -->
+
+                    <form id="forgotRequestForm">
+
+                        <div class="input-group">
+
+                            <label for="forgotEmail">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="forgotEmail"
+                                placeholder="Enter your registered email"
+                                required>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="login-button">
+
+                            Send Code
+                            <span>→</span>
+
+                        </button>
+
+                    </form>
+
+
+                    <!-- STEP 2: enter OTP + new password -->
+
+                    <form id="forgotResetForm"
+                          style="display: none;">
+
+                        <div class="input-group">
+
+                            <label for="forgotOtp">
+                                Verification Code
+                            </label>
+
+                            <input
+                                type="text"
+                                id="forgotOtp"
+                                placeholder="Enter the 6-digit code"
+                                inputmode="numeric"
+                                maxlength="6"
+                                required>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label for="forgotNewPassword">
+                                New Password
+                            </label>
+
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="forgotNewPassword"
+                                    placeholder="Enter a new password"
+                                    required>
+
+                                <button
+                                    type="button"
+                                    class="toggle-password"
+                                    aria-label="Show password"
+                                    onclick="togglePassword('forgotNewPassword', this)">
+                                    👁
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label for="forgotConfirmPassword">
+                                Confirm New Password
+                            </label>
+
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="forgotConfirmPassword"
+                                    placeholder="Re-enter the new password"
+                                    required>
+
+                                <button
+                                    type="button"
+                                    class="toggle-password"
+                                    aria-label="Show password"
+                                    onclick="togglePassword('forgotConfirmPassword', this)">
+                                    👁
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="login-button">
+
+                            Reset Password
+                            <span>→</span>
+
+                        </button>
+
+
+                        <p class="switch-text">
+
+                            Didn't get a code?
+
+                            <span onclick="resendForgotOtp()">
+                                Resend
+                            </span>
+
+                        </p>
+
+                    </form>
+
+
+                    <p id="forgotMessage"
+                       class="message">
+                    </p>
+
+
+                    <p class="switch-text">
+
+                        <span onclick="showLogin()">
+                            Back to Login
+                        </span>
+
+                    </p>
+
+                </div>
+
+
+
 
             </div>
 
