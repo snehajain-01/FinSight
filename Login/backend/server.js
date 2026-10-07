@@ -16,8 +16,10 @@ app.use(express.json());
 
 
 // MongoDB connection
+const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/finsight_db";
+
 mongoose
-    .connect(process.env.MONGODB_URI)
+    .connect(mongoUri)
     .then(() => {
         console.log("MongoDB connected successfully");
     })

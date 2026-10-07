@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>
+        Extracted Bank Statement Text
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<h1>
+    Extracted Text
+</h1>
+
+
+<h3>
+    File: {{ filename }}
+</h3>
+
+
+<pre>
+{{ extracted_text }}
+</pre>
+
+
+<br>
+
+
+<a href="{{ url_for('upload') }}">
+
+    Upload Another Statement
+
+</a>
+
+
+</body>
+
+</html>

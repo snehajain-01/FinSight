@@ -1,0 +1,7 @@
+Flask
+Flask-Cors
+pypdf
+pytesseract
+Pillow
+mysql-connector-python
+pymongo
