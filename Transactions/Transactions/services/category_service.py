@@ -319,6 +319,40 @@ def merchant_identity_key(merchant):
     ).lower()
 
 
+def transaction_dedupe_signature(transaction):
+    """
+    A signature for "is this practically the same transaction as one
+    already saved" - used to warn before an upload adds something
+    that's already on record (most commonly the same real-world
+    payment captured in two different screenshots, e.g. a PhonePe
+    receipt and the generic UPI "Payment Successful" dialog for the
+    same payment).
+
+    Matches on merchant identity + amount + the date/time reduced to
+    just its digits and am/pm, so formatting differences between
+    extractors/screenshots for the same moment - "18 Sept 2026" vs
+    "18 September 2026", "11:28 am" vs "11:28 AM" - don't defeat the
+    match.
+    """
+
+    digits = re.sub(
+        r"\D",
+        "",
+        (transaction.get("date") or "") + (transaction.get("time") or "")
+    )
+
+    ampm_match = re.search(
+        r"(am|pm)", (transaction.get("time") or ""), re.IGNORECASE
+    )
+
+    return (
+        merchant_identity_key(transaction.get("merchant")),
+        transaction.get("amount"),
+        digits,
+        ampm_match.group(1).lower() if ampm_match else ""
+    )
+
+
 def predict_category(merchant, is_debit=True):
     """
     Returns (category, confidence) for a merchant name. Tries, in order:

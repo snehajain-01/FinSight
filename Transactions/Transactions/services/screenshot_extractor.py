@@ -22,6 +22,16 @@ BARE_AMOUNT_LINE_RE = re.compile(r"^[\d,]+(?:\.\d{1,2})?$")
 # much longer reference number).
 TRAILING_AMOUNT_RE = re.compile(r"(?<!\d)(\d{1,6})\s*$")
 
+# Sometimes the ₹ glyph doesn't get dropped outright but is misread as
+# a stray symbol (e.g. "#20 Split Expense" for "₹20  Split Expense"),
+# gluing the amount to the start of a button/label line instead of it
+# ever landing on its own. Matches a short digit run right at the
+# start of a line - allowing a couple of stray symbol characters
+# before it - followed by whitespace then a letter, i.e. more text
+# continues on the line rather than the digits being part of a longer
+# ID (which wouldn't have whitespace right after these digits).
+LEADING_AMOUNT_RE = re.compile(r"^\W{0,2}(\d{1,6}(?:\.\d{1,2})?)\s+[A-Za-z]")
+
 DETAIL_SECTION_MARKERS = (
     "upi transaction id", "transaction id", "ref no", "reference no",
     "google transaction id", "utr"
@@ -54,8 +64,62 @@ _TIME = r"\d{1,2}[:.]\d{2}\s*[APap]\.?[Mm]\.?"
 DATE_THEN_TIME_RE = re.compile(rf"({_DATE})\s*,?\s*(?:at\s+)?({_TIME})")
 TIME_THEN_DATE_RE = re.compile(rf"({_TIME})\s*,?\s*(?:on\s+)?({_DATE})")
 
+# Some receipts (GPay's "Paid Successfully" screen) show the date
+# without a year at all ("6 Sep, 04:35 PM") - used only once the
+# year-inclusive patterns above have already failed to match.
+_DATE_NO_YEAR = r"\d{1,2}\s+[A-Za-z]{3,9}\.?"
+DATE_NO_YEAR_THEN_TIME_RE = re.compile(rf"({_DATE_NO_YEAR})\s*,?\s*(?:at\s+)?({_TIME})")
+TIME_THEN_DATE_NO_YEAR_RE = re.compile(rf"({_TIME})\s*,?\s*(?:on\s+)?({_DATE_NO_YEAR})")
+
 # Words that signal money coming IN rather than going OUT.
 CREDIT_HINTS = ("received", "credited")
+
+# Some layouts (a generic UPI-intent "Payment Successful" confirmation,
+# rather than GPay/PhonePe/Paytm's own "To:"/"Paid to" screens) show the
+# payee name as a plain headline right under the success banner, with
+# no label at all.
+SUCCESS_HEADER_RE = re.compile(r"(?i)\b(?:payment|transaction)\s+successful\b")
+
+# Lines that can sit between the success banner and the actual name
+# (or right after it) but obviously aren't a name themselves.
+NON_NAME_LINE_RE = re.compile(
+    r"(?i)^(?:split expense|view details|share receipt|done|paid|"
+    r"received|amount|total)\b"
+)
+
+# Google Pay's "Paid Successfully" receipt shows the recipient's name
+# and UPI ID *before* this banner, with the sender's own name coming
+# right after it - the reverse order from the "Payment/Transaction
+# Successful" layouts above, so it needs its own marker rather than
+# reusing SUCCESS_HEADER_RE (which would otherwise mis-fire here and
+# grab the sender's name from the line that follows).
+PAID_SUCCESSFULLY_RE = re.compile(r"(?i)\bpaid\s+successfully\b")
+
+# A plausible "Firstname Lastname" style name: 2-5 capitalized words
+# and nothing else on the line - a single-word app logo line (e.g.
+# "Paytm") doesn't match, so it's naturally skipped over.
+PLAUSIBLE_NAME_RE = re.compile(r"^[A-Z][a-zA-Z.'-]*(?:\s+[A-Z][a-zA-Z.'-]*){1,4}$")
+
+# An amount spelled out in words ("One Thousand Seven Hundred Sixty
+# Rupees"), as GPay's "Paid Successfully" receipt shows alongside the
+# digits - and worth trusting *more* than the digits, since spelled-out
+# words aren't vulnerable to the digit-glyph misreads (e.g. "1,760"
+# OCR'd as "1,/60") that plague the numeric amount on this layout.
+SPELLED_AMOUNT_RE = re.compile(r"(?i)^([a-z ]+?)\s+rupees?\b")
+
+_NUMBER_WORDS = {
+    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+    "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+    "nineteen": 19, "twenty": 20, "thirty": 30, "forty": 40,
+    "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
+}
+
+_SCALE_WORDS = {
+    "hundred": 100, "thousand": 1000, "lakh": 100000, "lac": 100000,
+    "crore": 10000000,
+}
 
 
 def _strip_avatar_initials(name):
@@ -114,12 +178,160 @@ def _find_label_then_next_line(lines, label_re):
     For layouts where the "To"/"From" label sits alone on its own line
     and the actual name is the line right after it (PhonePe's
     "Transaction Successful" screen), rather than on the same line.
+
+    Uses the *last* match rather than the first: the header banner
+    (date/time + "Paid to"/"Received from") often gets OCR'd twice -
+    once by ocr_service's dedicated header-region pass, then again as
+    part of the full-image pass - so the same label line can appear
+    back-to-back before the real content. Taking the first match would
+    return the second copy of the duplicated header instead of the
+    actual name that follows the real occurrence.
+    """
+
+    last_match_index = None
+
+    for index, line in enumerate(lines):
+
+        if label_re.match(line):
+            last_match_index = index
+
+    if last_match_index is not None and last_match_index + 1 < len(lines):
+        return lines[last_match_index + 1]
+
+    return None
+
+
+def _find_name_after_success_header(lines):
+    """
+    Fallback for layouts with no "To:"/"Paid to" label at all - just a
+    "Payment Successful" (or "Transaction Successful") banner followed
+    by the payee's name as a plain headline. Returns the first line
+    after the banner that isn't a date/time, an amount, a bare avatar
+    initials line, a UPI ID, or one of the button/label lines that can
+    appear nearby (e.g. "Split Expense").
     """
 
     for index, line in enumerate(lines):
 
-        if label_re.match(line) and index + 1 < len(lines):
-            return lines[index + 1]
+        if not SUCCESS_HEADER_RE.search(line):
+            continue
+
+        for candidate in lines[index + 1:]:
+
+            if (
+                DATE_THEN_TIME_RE.search(candidate)
+                or TIME_THEN_DATE_RE.search(candidate)
+                or re.search(_DATE, candidate)
+                or re.search(_TIME, candidate)
+            ):
+                continue
+
+            if AMOUNT_RE.search(candidate) or BARE_AMOUNT_LINE_RE.match(candidate):
+                continue
+
+            if "@" in candidate or NON_NAME_LINE_RE.match(candidate):
+                continue
+
+            if any(
+                marker in candidate.lower() for marker in DETAIL_SECTION_MARKERS
+            ):
+                continue
+
+            # A lone 1-3 letter avatar-initials line, with nothing else
+            # on it (as opposed to "AR ABDUL RAHEEM", which _clean_name
+            # already knows how to strip the initials from).
+            if re.match(r"^[A-Z]{1,3}$", candidate):
+                continue
+
+            return candidate
+
+        break
+
+    return None
+
+
+def _find_name_before_paid_successfully(lines):
+    """
+    Fallback for GPay's "Paid Successfully" receipt: the recipient's
+    name appears near the top, before their UPI ID, the amount, and
+    the "Paid Successfully" banner - rather than after a "Payment
+    Successful" banner, or next to a "To:"/"Paid to" label. Scans from
+    the top for the first plausible two-or-more-word capitalized name,
+    stopping as soon as it hits the UPI ID, the amount, the banner, or
+    a date/time - all of which mean the name has already been passed.
+    """
+
+    for line in lines:
+
+        if (
+            "@" in line
+            or AMOUNT_RE.search(line)
+            or BARE_AMOUNT_LINE_RE.match(line)
+            or PAID_SUCCESSFULLY_RE.search(line)
+            or re.search(_DATE, line)
+            or re.search(_TIME, line)
+        ):
+            break
+
+        if PLAUSIBLE_NAME_RE.match(line):
+            return line
+
+    return None
+
+
+def _words_to_number(phrase):
+    """
+    Converts a spelled-out English number ("one thousand seven hundred
+    sixty") to an int, Indian-numbering aware (lakh/crore). Returns
+    None if any word isn't recognized.
+    """
+
+    total = 0
+    current = 0
+    matched_any = False
+
+    for word in phrase.lower().replace("-", " ").split():
+
+        if word == "and":
+            continue
+
+        if word in _NUMBER_WORDS:
+            current += _NUMBER_WORDS[word]
+            matched_any = True
+
+        elif word in _SCALE_WORDS:
+
+            scale = _SCALE_WORDS[word]
+
+            if scale == 100:
+                current = (current or 1) * scale
+            else:
+                total += (current or 1) * scale
+                current = 0
+
+            matched_any = True
+
+        else:
+            return None
+
+    if not matched_any:
+        return None
+
+    return total + current
+
+
+def _find_spelled_out_amount(lines):
+
+    for line in lines:
+
+        match = SPELLED_AMOUNT_RE.match(line.strip())
+
+        if match:
+
+            value = _words_to_number(match.group(1))
+
+            if value is not None:
+                return value
 
     return None
 
@@ -153,6 +365,33 @@ def _find_bare_amount(lines):
             continue
 
         return line
+
+    return None
+
+
+def _find_leading_amount(lines):
+    """
+    Fallback for a misread (rather than dropped) ₹ glyph: a short
+    digit run at the very start of a line, immediately followed by
+    more text on the same line (e.g. "#20 Split Expense"). Skips
+    date/time lines so a leading day-of-month ("18 September...")
+    doesn't get mistaken for an amount.
+    """
+
+    for index, line in enumerate(lines):
+
+        if re.search(_DATE, line) or re.search(_TIME, line):
+            continue
+
+        lowered = line.lower()
+
+        if any(marker in lowered for marker in DETAIL_SECTION_MARKERS):
+            continue
+
+        match = LEADING_AMOUNT_RE.match(line)
+
+        if match:
+            return match.group(1)
 
     return None
 
@@ -212,16 +451,32 @@ def extract_transaction_from_screenshot(text):
 
     if amount_match:
 
-        amount_text = amount_match.group(1)
+        amount = float(amount_match.group(1).replace(",", ""))
 
     else:
 
-        amount_text = _find_bare_amount(lines) or _find_trailing_amount(lines)
+        spelled_amount = _find_spelled_out_amount(lines)
 
-        if not amount_text:
-            return []
+        if spelled_amount is not None:
 
-    amount = float(amount_text.replace(",", ""))
+            # Trust the spelled-out words over any digit-based
+            # fallback below - they aren't vulnerable to the
+            # digit-glyph misreads (e.g. "1,760" OCR'd as "1,/60")
+            # that the digit fallbacks exist to work around.
+            amount = float(spelled_amount)
+
+        else:
+
+            amount_text = (
+                _find_bare_amount(lines)
+                or _find_leading_amount(lines)
+                or _find_trailing_amount(lines)
+            )
+
+            if not amount_text:
+                return []
+
+            amount = float(amount_text.replace(",", ""))
 
     is_credit = any(hint in joined.lower() for hint in CREDIT_HINTS)
     transaction_type = "CREDIT" if is_credit else "DEBIT"
@@ -270,6 +525,20 @@ def extract_transaction_from_screenshot(text):
             merchant = _clean_name(fallback.group(1))
 
     if not merchant:
+
+        candidate = _find_name_after_success_header(lines)
+
+        if candidate:
+            merchant = _clean_name(candidate)
+
+    if not merchant and not is_credit:
+
+        candidate = _find_name_before_paid_successfully(lines)
+
+        if candidate:
+            merchant = _clean_name(candidate)
+
+    if not merchant:
         return []
 
     date = ""
@@ -286,6 +555,22 @@ def extract_transaction_from_screenshot(text):
 
         if time_date_match:
             time, date = time_date_match.group(1), time_date_match.group(2)
+
+        else:
+
+            no_year_match = (
+                DATE_NO_YEAR_THEN_TIME_RE.search(joined)
+                or TIME_THEN_DATE_NO_YEAR_RE.search(joined)
+            )
+
+            if no_year_match:
+
+                first, second = no_year_match.group(1), no_year_match.group(2)
+
+                if re.match(_TIME, first):
+                    time, date = first, second
+                else:
+                    date, time = first, second
 
     return [{
         "date": date,

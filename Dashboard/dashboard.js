@@ -266,8 +266,9 @@ async function uploadFile(file) {
         }
 
         const newTransactions = data.transactions || [];
+        const duplicates = data.duplicates || [];
 
-        if (!newTransactions.length) {
+        if (!newTransactions.length && !duplicates.length) {
 
             statusText.classList.add("upload-status-error");
             statusText.textContent =
@@ -278,17 +279,23 @@ async function uploadFile(file) {
             return;
         }
 
+        // Transactions that matched one already on record are held
+        // back on the server - they're dropped here rather than added,
+        // so the same statement can be re-uploaded without duplicating
+        // anything.
+        if (newTransactions.length) {
+
+            transactions = transactions.concat(newTransactions);
+            renderTransactions();
+            showSectionByName("transactions");
+        }
+
         statusText.classList.add("upload-status-success");
-        statusText.textContent =
-            `${file.name} processed successfully.`;
 
-        // Merge newly extracted transactions into the working set
-        transactions = transactions.concat(newTransactions);
-
-        renderTransactions();
-
-        // Jump to the Transactions tab to show the result
-        showSectionByName("transactions");
+        statusText.textContent = duplicates.length
+            ? `${file.name} processed. ${duplicates.length} duplicate ` +
+              `transaction(s) skipped.`
+            : `${file.name} processed successfully.`;
 
     } catch (error) {
 
@@ -821,15 +828,14 @@ function renderConfirmQueue(queue) {
 
 function updateOverview() {
 
-    const totalSpending = transactions
-        .filter(
-            transaction =>
-                (transaction.type || "").toUpperCase() === "DEBIT"
-        )
-        .reduce(
-            (sum, transaction) => sum + Number(transaction.amount || 0),
-            0
-        );
+    const debits = transactions.filter(
+        transaction => (transaction.type || "").toUpperCase() === "DEBIT"
+    );
+
+    const totalSpending = debits.reduce(
+        (sum, transaction) => sum + Number(transaction.amount || 0),
+        0
+    );
 
     const totalSpendingEl = document.getElementById("statTotalSpending");
     const totalSpendingHintEl =
@@ -840,6 +846,15 @@ function updateOverview() {
     const transactionCountHintEl =
         document.getElementById("statTransactionCountHint");
 
+    const averageSpendingEl =
+        document.getElementById("statAverageSpending");
+    const averageSpendingHintEl =
+        document.getElementById("statAverageSpendingHint");
+
+    const topCategoryEl = document.getElementById("statTopCategory");
+    const topCategoryHintEl =
+        document.getElementById("statTopCategoryHint");
+
     if (!transactions.length) {
 
         totalSpendingEl.textContent = "—";
@@ -847,6 +862,12 @@ function updateOverview() {
 
         transactionCountEl.textContent = "—";
         transactionCountHintEl.textContent = "No transactions yet";
+
+        averageSpendingEl.textContent = "—";
+        averageSpendingHintEl.textContent = "No data available";
+
+        topCategoryEl.textContent = "—";
+        topCategoryHintEl.textContent = "No data available";
 
         return;
     }
@@ -856,6 +877,33 @@ function updateOverview() {
 
     transactionCountEl.textContent = transactions.length;
     transactionCountHintEl.textContent = "Extracted from your documents";
+
+    const averageSpending = debits.length ? totalSpending / debits.length : 0;
+
+    averageSpendingEl.textContent = debits.length
+        ? `₹${averageSpending.toFixed(2)}`
+        : "—";
+    averageSpendingHintEl.textContent = debits.length
+        ? "Per debit transaction"
+        : "No debit transactions yet";
+
+    const categoryTotals = {};
+
+    debits.forEach(transaction => {
+
+        const category = transaction.category || DEFAULT_CATEGORY;
+
+        categoryTotals[category] =
+            (categoryTotals[category] || 0) + Number(transaction.amount || 0);
+    });
+
+    const topCategory = Object.entries(categoryTotals)
+        .sort((a, b) => b[1] - a[1])[0];
+
+    topCategoryEl.textContent = topCategory ? topCategory[0] : "—";
+    topCategoryHintEl.textContent = topCategory
+        ? `₹${topCategory[1].toFixed(2)} spent`
+        : "No data available";
 }
 
 

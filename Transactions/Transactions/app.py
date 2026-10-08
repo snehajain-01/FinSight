@@ -44,7 +44,8 @@ from services.category_service import (
     CATEGORIES,
     apply_categories,
     merchant_identity_key,
-    is_person_like
+    is_person_like,
+    transaction_dedupe_signature
 )
 
 load_dotenv()
@@ -188,11 +189,19 @@ def allowed_file(filename):
 def process_uploaded_file(file, user_id="temporary_user_123"):
     """
     Saves the uploaded file, extracts its transaction(s) and stores
-    them in MongoDB under the given user. Returns (filename, transactions).
+    the non-duplicate ones in MongoDB under the given user. Returns
+    (filename, new_transactions, duplicates).
 
     A PDF is treated as a bank statement (many transactions); an image
     is treated as a single payment screenshot (one transaction) and
     goes through OCR instead of the PDF text layer.
+
+    A transaction that matches one already on record (see
+    transaction_dedupe_signature - most commonly the same real-world
+    payment captured in two different screenshots) is held back rather
+    than saved automatically: it's returned in `duplicates` so the
+    caller can ask the user whether to add it anyway before it's
+    committed via confirm_duplicate_transaction().
     """
 
     filename = secure_filename(
@@ -233,13 +242,38 @@ def process_uploaded_file(file, user_id="temporary_user_123"):
         user_id
     )
 
-    save_statement(
-        filename,
-        transactions,
-        user_id
-    )
+    existing_by_signature = {
+        transaction_dedupe_signature(existing): existing
+        for statement in get_user_statements(user_id)
+        for existing in statement.get("transactions", [])
+    }
 
-    return filename, transactions
+    new_transactions = []
+    duplicates = []
+
+    for transaction in transactions:
+
+        match = existing_by_signature.get(
+            transaction_dedupe_signature(transaction)
+        )
+
+        if match:
+            duplicates.append({
+                "transaction": transaction,
+                "matches": match
+            })
+        else:
+            new_transactions.append(transaction)
+
+    if new_transactions:
+
+        save_statement(
+            filename,
+            new_transactions,
+            user_id
+        )
+
+    return filename, new_transactions, duplicates
 
 
 # --------------------------------
@@ -358,7 +392,14 @@ def upload():
     # PROCESS PDF
     # ----------------------------
 
-    filename, transactions = process_uploaded_file(file)
+    filename, transactions, duplicates = process_uploaded_file(file)
+
+    if duplicates:
+
+        flash(
+            f"{len(duplicates)} transaction(s) in {filename} matched "
+            "one already on record and were not added."
+        )
 
 
     # ----------------------------
@@ -693,7 +734,9 @@ def api_upload():
 
     try:
 
-        filename, transactions = process_uploaded_file(file, user_id)
+        filename, transactions, duplicates = process_uploaded_file(
+            file, user_id
+        )
 
     except Exception as error:
 
@@ -706,7 +749,57 @@ def api_upload():
     return jsonify({
         "success": True,
         "filename": filename,
-        "transactions": transactions
+        "transactions": transactions,
+        "duplicates": duplicates
+    })
+
+
+# --------------------------------
+# JSON API - CONFIRM A DUPLICATE TRANSACTION
+# --------------------------------
+
+@app.route(
+    "/api/upload/confirm-duplicate",
+    methods=["POST"]
+)
+def confirm_duplicate_transaction():
+    """
+    Saves a transaction that process_uploaded_file() had held back as
+    a likely duplicate, after the user chose to add it anyway.
+    """
+
+    user_id = session.get("user_id")
+
+    if not user_id:
+
+        return jsonify({
+            "success": False,
+            "message": "You must be logged in to upload a document."
+        }), 401
+
+
+    body = request.get_json(silent=True) or {}
+
+    filename = body.get("filename")
+    transaction = body.get("transaction")
+
+    if not filename or not isinstance(transaction, dict):
+
+        return jsonify({
+            "success": False,
+            "message": "Missing filename or transaction."
+        }), 400
+
+
+    save_statement(
+        filename,
+        [transaction],
+        user_id
+    )
+
+    return jsonify({
+        "success": True,
+        "transaction": transaction
     })
 
 
