@@ -1,4 +1,5 @@
 import os
+import re
 
 from dotenv import load_dotenv
 from pymongo import MongoClient, ReturnDocument
@@ -226,3 +227,54 @@ def update_transaction_category(user_id, transaction_id, category):
         },
         return_document=ReturnDocument.AFTER
     )
+
+
+# --------------------------------
+# PERSIST A CONFIRMED CATEGORY TO EVERY STORED TRANSACTION FOR
+# THE SAME MERCHANT (not just the one the user clicked)
+# --------------------------------
+
+def update_transactions_by_merchant(
+    user_id,
+    merchant_key,
+    category,
+    is_person,
+    exclude_transaction_id=None
+):
+    """
+    update_transaction_category() above only ever touches the one
+    transaction id it's given. The Dashboard confirms a category once
+    per merchant and then relies on this to make every other already-
+    saved transaction from that merchant (across every statement, not
+    just the current one) reflect the same category - otherwise those
+    other transactions keep whatever apply_categories() guessed at
+    upload time and come back asking for review again on the next
+    page load, even though the user already answered for that merchant.
+    """
+
+    for statement in statements_collection.find({"user_id": user_id}):
+
+        matching_ids = [
+            transaction.get("id")
+            for transaction in statement.get("transactions", [])
+            if transaction.get("id") != exclude_transaction_id
+            and re.sub(
+                r"\s+", "", (transaction.get("merchant") or "")
+            ).lower() == merchant_key
+        ]
+
+        if not matching_ids:
+            continue
+
+        statements_collection.update_one(
+            {"_id": statement["_id"]},
+            {
+                "$set": {
+                    "transactions.$[elem].category": category,
+                    "transactions.$[elem].confidence": 1.0,
+                    "transactions.$[elem].needs_review": False,
+                    "transactions.$[elem].is_person": is_person
+                }
+            },
+            array_filters=[{"elem.id": {"$in": matching_ids}}]
+        )

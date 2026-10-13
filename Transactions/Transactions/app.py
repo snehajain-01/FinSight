@@ -32,6 +32,7 @@ from database.database import (
     find_user_by_email,
     create_user,
     update_transaction_category,
+    update_transactions_by_merchant,
     save_merchant_category,
     set_password_reset_otp,
     reset_user_password
@@ -283,10 +284,8 @@ def process_uploaded_file(file, user_id="temporary_user_123"):
 @app.route("/")
 def home():
 
-    if "user_id" in session:
-
-        return redirect("/dashboard.html")
-
+    # Always start at the Login page, even if an earlier session is
+    # still remembered - the Dashboard is reached only via sign-in.
     return send_from_directory(
         LOGIN_FRONTEND_DIR,
         "index.html"
@@ -926,6 +925,22 @@ def api_update_transaction_category(transaction_id):
             user_id,
             merchant_key,
             category
+        )
+
+        # save_merchant_category() above only affects categorization
+        # of future uploads. Every matching transaction already saved
+        # (in this statement or an earlier one) needs the same update
+        # applied directly, or it keeps its old category/needs_review
+        # value in MongoDB and comes back asking for review again on
+        # the next page load - the Dashboard's local "resolve every
+        # other instance already loaded" only lives in that browser
+        # tab, not in the database.
+        update_transactions_by_merchant(
+            user_id,
+            merchant_key,
+            category,
+            is_person,
+            exclude_transaction_id=transaction_id
         )
 
 
